@@ -12,87 +12,33 @@ h2 {
     text-align: center;
 }
 
-/* Карточка формы */
-form {
-    display: flex;
-    flex-direction: column;
-    padding: 16px;
-    margin-bottom: 20px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background-color: #fafafa;
+/* Кнопка перехода к созданию заметки */
+.create-note-box {
+    margin-bottom: 16px;
+    text-align: center;
 }
 
-/* Группа поля (label сверху, input/textarea под ним) */
-form > div {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 14px;
-}
-
-label {
-    display: block;
-    font-size: 14px;
-    font-weight: 600;
-    color: #444;
-    margin-bottom: 6px;
-}
-
-input,
-textarea {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 8px 12px;
-    font-size: 14px;
-    border: 1px solid #ccc;
+.create-button {
+    display: inline-block;
+    padding: 8px 16px;
     border-radius: 6px;
-    outline: none;
-    font-family: inherit;
-    background-color: #fff;
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-input:focus,
-textarea:focus {
-    border-color: #1976d2;
-    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.15);
-}
-
-textarea {
-    min-height: 80px;
-    resize: vertical;
-}
-
-/* Ошибка валидации */
-form div p {
-    color: #e53935;
-    font-size: 12px;
-    margin-top: 5px;
-    margin-bottom: 0;
-}
-
-/* Кнопка отправки */
-form button[type="submit"] {
-    align-self: flex-start;
-    padding: 8px 18px;
-    border: none;
-    border-radius: 6px;
-    background: #1976d2;
+    background-color: #1976d2;
     color: #fff;
+    text-decoration: none;
     font-size: 14px;
     font-weight: 500;
-    cursor: pointer;
     transition: background-color 0.2s;
 }
 
-form button[type="submit"]:hover:not(:disabled) {
-    background: #1565c0;
+.create-button:hover {
+    background-color: #1565c0;
 }
 
-form button[type="submit"]:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-    opacity: 0.7;
+/* Ошибка удаления */
+.action-error {
+    color: #e53935;
+    font-size: 13px;
+    margin-bottom: 8px;
 }
 
 /* Навигация и фильтры */

@@ -4,32 +4,18 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { NoteItemComponent } from "../note-item/note-item";
 import { type Note, NotesService } from '../../notes.service';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-note-list',
   standalone: true,
-  imports: [NoteItemComponent, RouterLink, ReactiveFormsModule,],
+  imports: [NoteItemComponent, RouterLink],
   styleUrl: './note-list.css',
   template: `
     <h2>Note List</h2>
 
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
-      <div>
-        <label for="title">Title</label>
-        <input id="title" type="text" formControlName="title" />
-        @if (title.hasError('required') && (title.touched || title.dirty)) {
-          <p>Title is required</p>
-        }
-      </div>
-
-      <div>
-        <label for="description">Description</label>
-        <textarea id="description" formControlName="description"></textarea>
-      </div>
-
-      <button type="submit" [disabled]="form.invalid">Submit</button>
-    </form>
+    <div class="create-note-box">
+      <a routerLink="/notes/new" class="create-button">+ Create new note</a>
+    </div>
 
     <p>
       Search query:
@@ -49,7 +35,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
     </nav>
 
     @if (actionError()) {
-      <p>{{ actionError() }}</p>
+      <p class="action-error">{{ actionError() }}</p>
     }
 
     @if (loading()) {
@@ -69,43 +55,18 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
   `
 })
 export class NoteListComponent implements OnInit {
-  private notesService = inject(NotesService)
+  private notesService = inject(NotesService);
   private route = inject(ActivatedRoute);
-
-  form = new FormGroup({
-    title: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    description: new FormControl('', { nonNullable: true }),
-  });
-
-  get title() {
-    return this.form.controls.title;
-  }
-
-  onSubmit() {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
-
-    this.actionError.set(null);
-    this.notesService.createNote(this.form.getRawValue()).subscribe({
-      next: (created) => {
-        this.notes.update((notes) => [...notes, created]);
-        this.form.reset();
-      },
-      error: () => this.actionError.set('Failed to create note'),
-    });
-  }
 
   search = toSignal(
     this.route.queryParamMap.pipe(map((params) => params.get('search') ?? '')),
     { initialValue: '' }
-  )
+  );
 
   notes = signal<Note[]>([]);
-  loading = signal(true);            // true сразу, чтобы не мелькало «No notes found»
-  error = signal<string | null>(null);       // ошибка загрузки списка
-  actionError = signal<string | null>(null); // ошибка создания / удаления
+  loading = signal(true);
+  error = signal<string | null>(null);
+  actionError = signal<string | null>(null);
 
   ngOnInit(): void {
     this.loadNotes();
@@ -119,7 +80,6 @@ export class NoteListComponent implements OnInit {
       next: (notes) => {
         this.notes.set(notes);
         this.loading.set(false);
-        console.log(`NoteListComponent initialized. Notes count: ${notes.length}`);
       },
       error: () => {
         this.error.set('Failed to load notes');
