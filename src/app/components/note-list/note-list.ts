@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
+import { finalize, map } from 'rxjs';
 import { NoteItemComponent } from "../note-item/note-item";
 import { type Note, NotesService } from '../../notes.service';
 
@@ -57,6 +57,7 @@ import { type Note, NotesService } from '../../notes.service';
 export class NoteListComponent implements OnInit {
   private notesService = inject(NotesService);
   private route = inject(ActivatedRoute);
+  private deleting = new Set<number>();
 
   search = toSignal(
     this.route.queryParamMap.pipe(map((params) => params.get('search') ?? '')),
@@ -76,21 +77,22 @@ export class NoteListComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    this.notesService.getNotes().subscribe({
-      next: (notes) => {
-        this.notes.set(notes);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.error.set('Failed to load notes');
-        this.loading.set(false);
-      },
+    this.notesService.getNotes().pipe(
+      finalize(() => this.loading.set(false)),
+    ).subscribe({
+      next: (notes) => this.notes.set(notes),
+      error: () => this.error.set('Failed to load notes'),
     });
   }
 
   onDelete(id: number) {
+    if (this.deleting.has(id)) return;
+    this.deleting.add(id);
     this.actionError.set(null);
-    this.notesService.deleteNote(id).subscribe({
+
+    this.notesService.deleteNote(id).pipe(
+      finalize(() => this.deleting.delete(id)),
+    ).subscribe({
       next: () => this.notes.update((notes) => notes.filter((note) => note.id !== id)),
       error: () => this.actionError.set('Failed to delete note'),
     });
