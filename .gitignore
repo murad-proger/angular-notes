@@ -5,11 +5,28 @@
 /tmp
 /out-tsc
 /bazel-out
+*.tsbuildinfo
 
-# Node
+# Node dependencies
 /node_modules
-npm-debug.log
-yarn-error.log
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment variables & secrets
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
 
 # IDEs and editors
 .idea/
@@ -19,6 +36,9 @@ yarn-error.log
 *.launch
 .settings/
 *.sublime-workspace
+*.swp
+*.swo
+*~
 
 # Visual Studio Code
 .vscode/*
@@ -29,7 +49,8 @@ yarn-error.log
 !.vscode/mcp.json
 .history/*
 
-# Miscellaneous
+# Miscellaneous & Angular
+/.angular
 /.angular/cache
 .sass-cache/
 /connect.lock
@@ -38,7 +59,13 @@ yarn-error.log
 testem.log
 /typings
 __screenshots__/
+.vitest/
 
 # System files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
 Thumbs.db
+[Dd]esktop.ini
