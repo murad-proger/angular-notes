@@ -1,29 +1,37 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 export interface Note {
     id: number;
     title: string;
+    description: string;
 }
+
+export type NewNote = Omit<Note, 'id'>;
+
+const API_URL = 'https://e441bfce1d72a501.mokky.dev/notes';
 
 @Injectable({
     providedIn: 'root',
 })
 
 export class NotesService {
-    private notes: Note[] = [
-        { id: 1, title: 'Learn Angular' },
-        { id: 2, title: 'Learn Signals' },
-    ];
+    private http = inject(HttpClient)
 
-    getNote(id: number): Note | undefined {
-        return this.notes.find((note) => note.id === id);
+    getNote(id: number): Observable<Note> {
+        return this.http.get<Note>(`${API_URL}/${id}`);
     }
 
-    getNotes(): Note[] {
-        return [...this.notes];
+    getNotes(): Observable<Note[]> {
+        return this.http.get<Note[]>(API_URL);
     }
 
-    deleteNote(id: number) {
-        this.notes = this.notes.filter((note) => note.id !== id);
+    createNote(note: NewNote): Observable<Note> {
+        return this.http.post<Note>(API_URL, note);
+    }
+
+    deleteNote(id: number): Observable<unknown> {
+        return this.http.delete(`${API_URL}/${id}`);
     }
 }

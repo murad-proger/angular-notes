@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
@@ -48,14 +48,24 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
       <a routerLink="/notes">clear</a>
     </nav>
 
+    @if (actionError()) {
+      <p>{{ actionError() }}</p>
+    }
 
-    <div>
-        @for (note of notes; track note.id) {
-            <app-note-item [noteId]="note.id" [title]="note.title" (delete)="onDelete($event)"></app-note-item>
+    @if (loading()) {
+      <p>Loading...</p>
+    } @else if (error()) {
+      <p>{{ error() }}</p>
+      <button type="button" (click)="loadNotes()">Retry</button>
+    } @else {
+      <div>
+        @for (note of notes(); track note.id) {
+          <app-note-item [noteId]="note.id" [title]="note.title" (delete)="onDelete($event)"></app-note-item>
         } @empty {
-            <p>No notes found</p>
+          <p>No notes found</p>
         }
-    </div>
+      </div>
+    }
   `
 })
 export class NoteListComponent implements OnInit {
@@ -77,9 +87,14 @@ export class NoteListComponent implements OnInit {
       return;
     }
 
-    console.log(
-      `title: ${this.form.getRawValue().title} \ndescription: ${this.form.getRawValue().description}`
-    );
+    this.actionError.set(null);
+    this.notesService.createNote(this.form.getRawValue()).subscribe({
+      next: (created) => {
+        this.notes.update((notes) => [...notes, created]);
+        this.form.reset();
+      },
+      error: () => this.actionError.set('Failed to create note'),
+    });
   }
 
   search = toSignal(
@@ -87,14 +102,37 @@ export class NoteListComponent implements OnInit {
     { initialValue: '' }
   )
 
-  notes: Note[] = this.notesService.getNotes();
+  notes = signal<Note[]>([]);
+  loading = signal(true);            // true сразу, чтобы не мелькало «No notes found»
+  error = signal<string | null>(null);       // ошибка загрузки списка
+  actionError = signal<string | null>(null); // ошибка создания / удаления
 
   ngOnInit(): void {
-    console.log(`NoteListComponent initialized. Notes count: ${this.notes.length}`);
+    this.loadNotes();
+  }
+
+  loadNotes() {
+    this.loading.set(true);
+    this.error.set(null);
+
+    this.notesService.getNotes().subscribe({
+      next: (notes) => {
+        this.notes.set(notes);
+        this.loading.set(false);
+        console.log(`NoteListComponent initialized. Notes count: ${notes.length}`);
+      },
+      error: () => {
+        this.error.set('Failed to load notes');
+        this.loading.set(false);
+      },
+    });
   }
 
   onDelete(id: number) {
-    this.notesService.deleteNote(id);
-    this.notes = this.notesService.getNotes();
+    this.actionError.set(null);
+    this.notesService.deleteNote(id).subscribe({
+      next: () => this.notes.update((notes) => notes.filter((note) => note.id !== id)),
+      error: () => this.actionError.set('Failed to delete note'),
+    });
   }
 }
