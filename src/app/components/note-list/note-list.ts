@@ -1,7 +1,6 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { finalize, map } from 'rxjs';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { finalize } from 'rxjs';
 import { NoteItemComponent } from "../note-item/note-item";
 import { type Note, NotesService } from '../../notes.service';
 
@@ -17,22 +16,23 @@ import { type Note, NotesService } from '../../notes.service';
       <a routerLink="/notes/new" class="create-button">+ Create new note</a>
     </div>
 
-    <p>
-      Search query:
+    <div class="search-box">
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Search notes..."
+        [value]="search()"
+        (input)="onSearch($any($event.target).value)"
+      />
       @if (search()) {
-        <strong>{{ search() }}</strong>
-      } @else {
-        <em>not set</em>
+        <button
+          type="button"
+          class="clear-btn"
+          aria-label="Clear search"
+          (click)="onClear()"
+        ></button>
       }
-    </p>
-
-    <nav>
-      <a routerLink="/notes" [queryParams]="{ search: 'angular' }">search=angular</a>
-      <span> | </span>
-      <a routerLink="/notes" [queryParams]="{ search: 'signals' }">search=signals</a>
-      <span> | </span>
-      <a routerLink="/notes">clear</a>
-    </nav>
+    </div>
 
     @if (actionError()) {
       <p class="action-error">{{ actionError() }}</p>
@@ -45,7 +45,7 @@ import { type Note, NotesService } from '../../notes.service';
       <button type="button" (click)="loadNotes()">Retry</button>
     } @else {
       <div>
-        @for (note of notes(); track note.id) {
+        @for (note of filteredNotes(); track note.id) {
           <app-note-item [noteId]="note.id" [title]="note.title" (delete)="onDelete($event)"></app-note-item>
         } @empty {
           <p>No notes found</p>
@@ -57,20 +57,52 @@ import { type Note, NotesService } from '../../notes.service';
 export class NoteListComponent implements OnInit {
   private notesService = inject(NotesService);
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private deleting = new Set<number>();
 
-  search = toSignal(
-    this.route.queryParamMap.pipe(map((params) => params.get('search') ?? '')),
-    { initialValue: '' }
-  );
+  search = signal(this.route.snapshot.queryParamMap.get('search') ?? '');
 
   notes = signal<Note[]>([]);
   loading = signal(true);
   error = signal<string | null>(null);
   actionError = signal<string | null>(null);
 
+  filteredNotes = computed(() => {
+    const query = this.search().toLowerCase().trim();
+    if (!query) return this.notes();
+    return this.notes().filter((note) =>
+      note.title.toLowerCase().includes(query) ||
+      note.description?.toLowerCase().includes(query)
+    );
+  });
+
+  constructor() {
+    this.route.queryParamMap.subscribe((params) => {
+      const q = params.get('search') ?? '';
+      if (this.search() !== q) {
+        this.search.set(q);
+      }
+    });
+  }
+
   ngOnInit(): void {
     this.loadNotes();
+  }
+
+  onSearch(value: string) {
+    this.search.set(value);
+    this.router.navigate([], {
+      queryParams: { search: value.trim() ? value : null },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  onClear() {
+    this.search.set('');
+    this.router.navigate([], {
+      queryParams: { search: null },
+      queryParamsHandling: 'merge',
+    });
   }
 
   loadNotes() {

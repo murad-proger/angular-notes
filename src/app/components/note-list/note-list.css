@@ -34,25 +34,80 @@ h2 {
     background-color: #1565c0;
 }
 
+/* Инпут поиска с кнопкой очистки */
+.search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+    width: 100%;
+}
+
+.search-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 36px 8px 12px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    outline: none;
+    font-family: inherit;
+    background-color: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-input:focus {
+    border-color: #1976d2;
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.15);
+}
+
+.clear-btn {
+    position: absolute;
+    right: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: #e0e0e0;
+    color: #666;
+    font-size: 12px;
+    cursor: pointer;
+    line-height: 1;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.clear-btn:hover {
+    background: #bdbdbd;
+    color: #212121;
+}
+
+.clear-btn::before,
+.clear-btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 2px;
+    border-radius: 1px;
+    background: #fff;
+}
+
+.clear-btn::before {
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.clear-btn::after {
+    transform: translate(-50%, -50%) rotate(-45deg);
+}
+
 /* Ошибка удаления */
 .action-error {
     color: #e53935;
     font-size: 13px;
     margin-bottom: 8px;
-}
-
-/* Навигация и фильтры */
-nav {
-    margin: 12px 0 16px;
-    font-size: 14px;
-    color: #666;
-}
-
-nav a {
-    color: #1976d2;
-    text-decoration: none;
-}
-
-nav a:hover {
-    text-decoration: underline;
 }
