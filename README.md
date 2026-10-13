@@ -16,7 +16,7 @@ I'm a frontend developer (React / Next.js / TypeScript). I built this project af
 - **Note details page** loaded by route parameter
 - **Delete a note** with protection against duplicate requests and an error message on failure
 - **HTTP interceptor** that logs every outgoing request
-- **Server-side rendering** with an Express server
+- **Static prerendering** (`@angular/ssr`, `outputMode: static`) — the app is built to static HTML and deployed to GitHub Pages
 
 ## Tech stack
 
@@ -28,7 +28,8 @@ I'm a frontend developer (React / Next.js / TypeScript). I built this project af
 | Forms | Typed Reactive Forms |
 | Routing | Angular Router with component input binding |
 | HTTP | `HttpClient` + functional interceptor |
-| SSR | `@angular/ssr`, Express, prerendering, hydration with event replay |
+| Rendering | `@angular/ssr` with static prerendering (`outputMode: static`), hydration with event replay |
+| Hosting | GitHub Pages |
 | Backend | [Mokky.dev](https://mokky.dev) (mock REST API) |
 
 ## What I focused on
@@ -97,7 +98,7 @@ ng serve
 
 Open `http://localhost:4200/`.
 
-Production build (with SSR):
+Production build (static prerendered output, ready for GitHub Pages):
 
 ```bash
 ng build
